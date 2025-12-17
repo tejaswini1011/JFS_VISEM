@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Timetable Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+      table {
+        width: 80%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      th,
+      td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+      }
+      th {
+        background: lightblue;
+      }
+      .batch-title {
+        font-weight: bold;
+        font-size: 20px;
+        margin-top: 30px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h2>Upload CSV File</h2>
+    <input type="file" id="csvFile" accept=".csv" />
+
+    <h3>Faculty-wise Timetable (Optional)</h3>
+    <select id="facultySelect">
+      <option value="">-- All Batches (Default) --</option>
+    </select>
+    <button onclick="handleView()">View</button>
+
+    <div id="tables"></div>
+
+    <script>
+      let originalData = [];
+
+      document
+        .getElementById("csvFile")
+        .addEventListener("change", function () {
+          Papa.parse(this.files[0], {
+            header: true,
+            skipEmptyLines: true,
+            complete: function (result) {
+              originalData = result.data;
+              populateFacultyDropdown(result.data);
+              processBatchWise(result.data); // default view
+            },
+          });
+        });
+
+      function populateFacultyDropdown(data) {
+        const facultySet = new Set();
+        const select = document.getElementById("facultySelect");
+        select.innerHTML = `<option value="">-- All Batches (Default) --</option>`;
+
+        data.forEach((row) => {
+          if (row["FACULTY"]) {
+            facultySet.add(row["FACULTY"].trim());
+          }
+        });
+
+        facultySet.forEach((faculty) => {
+          const option = document.createElement("option");
+          option.value = faculty;
+          option.textContent = faculty;
+          select.appendChild(option);
+        });
+      }
+
+      function handleView() {
+        const faculty = document.getElementById("facultySelect").value;
+        if (faculty === "") {
+          processBatchWise(originalData); // original behavior
+        } else {
+          showFacultyTimetable(faculty);
+        }
+      }
+
+      /* -------------------- BATCH-WISE (ORIGINAL) -------------------- */
+
+      function processBatchWise(data) {
+        const timetable = {};
+
+        data.forEach((row) => {
+          const batch = row["BATCH"];
+          const day = row["DAY"];
+          const session = row["SESSION"];
+          const course = row["COURSE"];
+          const room = row["ROOM"];
+          const faculty = row["FACULTY"];
+
+          if (!batch || !day || !session) return;
+
+          timetable[batch] ??= {};
+          timetable[batch][day] ??= { FN: "", AN: "" };
+
+          timetable[batch][day][
+            session
+          ] = `${course}<br>Room: ${room}<br>Faculty: ${faculty}`;
+        });
+
+        buildBatchTables(timetable);
+      }
+
+      function buildBatchTables(timetable) {
+        const container = document.getElementById("tables");
+        container.innerHTML = "";
+
+        const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+        for (const batch in timetable) {
+          const title = document.createElement("div");
+          title.className = "batch-title";
+          title.innerText = `Batch: ${batch}`;
+
+          const table = document.createElement("table");
+
+          let html =
+            "<tr><th>DAY</th><th>FN</th><th rowspan=7>L<br>U<br>N<br>C<br>H</th><th>AN</th></tr>";
+
+          days.forEach((day) => {
+            html += `
+              <tr>
+                <td>${day}</td>
+                <td>${timetable[batch][day]?.FN || ""}</td>
+                <td>${timetable[batch][day]?.AN || ""}</td>
+              </tr>
+            `;
+          });
+
+          table.innerHTML = html;
+          container.appendChild(title);
+          container.appendChild(table);
+        }
+      }
+
+      /* -------------------- FACULTY-WISE (SINGLE TABLE) -------------------- */
+      
+
+      function showFacultyTimetable(faculty) {
+        const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        const timetable = {};
+        days.forEach((d) => (timetable[d] = { FN: [], AN: [] }));
+
+        originalData.forEach((row) => {
+          if (row["FACULTY"]?.trim() === faculty) {
+            timetable[row["DAY"]][row["SESSION"]].push(
+              `${row["BATCH"]} (${row["COURSE"]})`
+            );
+          }
+        });
+
+        buildFacultyTable(faculty, timetable);
+      }
+
+      function buildFacultyTable(faculty, timetable) {
+        const container = document.getElementById("tables");
+        container.innerHTML = "";
+
+        const title = document.createElement("h3");
+        title.innerText = `Faculty Timetable: ${faculty}`;
+
+        const table = document.createElement("table");
+
+        let html = `
+          <tr>
+            <th>DAY</th>
+            <th>FN</th>
+            <th rowspan="7">L<br>U<br>N<br>C<br>H</th>
+            <th>AN</th>
+          </tr>
+        `;
+
+        for (const day in timetable) {
+          html += `
+            <tr>
+              <td>${day}</td>
+              <td>${timetable[day].FN.join("<br>")}</td>
+              <td>${timetable[day].AN.join("<br>")}</td>
+            </tr>
+          `;
+        }
+
+        table.innerHTML = html;
+        container.appendChild(title);
+        container.appendChild(table);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Display Photo and Information</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 40px;
+        }
+
+        #searchBox {
+            width: 300px;
+            height: 35px;
+            font-size: 16px;
+            padding-left: 10px;
+            margin-bottom: 12px;
+        }
+
+        .container {
+            display: flex;
+            margin-top: 30px;
+            gap: 40px;
+        }
+
+        .photo-box,
+        .info-box {
+            width: 45%;
+            padding: 20px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            min-height: 260px;
+        }
+
+        #photo {
+            width: 220px;
+            height: 220px;
+            border-radius: 25%;
+            object-fit: cover;
+            border: 2px solid #444;
+            display: none;
+        }
+
+        .photo-james {
+            border: 6px solid gold !important;
+            padding: 5px;
+            border-radius: 0 !important;
+            /* Makes it RECTANGLE */
+            width: 240px !important;
+            height: 260px !important;
+        }
+
+        .photo-james-blue {
+            width: 240px !important;
+            height: 260px !important;
+            border: 6px solid #1e90ff !important;
+            padding: 5px;
+            border-radius: 0 !important;
+            box-shadow: 0 0 20px #1e90ff;
+            animation: jamesBlueGlow 1s infinite alternate ease-in-out;
+        }
+
+        @keyframes jamesBlueGlow {
+            0% {
+                box-shadow: 0 0 10px #1e90ff;
+            }
+
+            100% {
+                box-shadow: 0 0 40px #1e90ff, 0 0 80px #00bfff;
+            }
+        }
+
+
+        .title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Select a Name to Display Photo & Info</h2>
+
+
+    <!-- Dropdown -->
+    <select id="nameSelect" onchange="showDetails()" style='height:40px; width:320px;'>
+        <option value="">-- Select Name --</option>
+
+        <!-- Earlier personalities -->
+        <option value="guido">Guido van Rossum (Python)</option>
+        <option value="dennis">Dennis M. Ritchie (C)</option>
+        <option value="james">James Gosling (Java)</option>
+        <option value="stroustrup">Bjarne Stroustrup (C++)</option>
+        <option value="juergen">Juergen Hoeller (Spring Framework)</option>
+        <option value="krishna">E Krishna Rao Patro (JFS Trainer)</option>
+
+        <!-- New personalities -->
+        <option value="bill_gates">Bill Gates (Microsoft)</option>
+        <option value="steve_jobs">Steve Jobs (Apple)</option>
+        <option value="elon_musk">Elon Musk (Tesla/SpaceX)</option>
+        <option value="zukerberg">Mark Zuckerberg (Facebook)</option>
+        <option value="linus_torvalds">Linus Torvalds (Linux)</option>
+        <option value="tim_berner">Tim Berners-Lee (WWW)</option>
+        <option value="Sundar_Pichai">Sundar Pichai (Google CEO)</option>
+        <option value="satyanadella">Satya Nadella (Microsoft CEO)</option>
+        <option value="tejaswini">Sai Tejaswini (Student)</option>
+        <option value="AdaLovelace">Ada Lovelace (1st Programmer)</option>
+        <option value="madhu">Madhu (JFS Trainer, CDC, IARE Hyderabad)</option>
+    </select>
+
+    <button onclick="openPhoto()" style="height:40px; margin-left:10px; padding:0 20px; font-size:16px;">
+            OK
+        </button>
+
+    <div class="container">
+
+        <!-- LEFT BOX: PHOTO -->
+        <div class="photo-box">
+            <img id="photo" src="" alt="Person Photo">
+        </div>
+
+        <!-- RIGHT BOX: INFORMATION -->
+        <div class="info-box" id="infoBox">
+            <span class="title">Person Information</span>
+            <p id="infoText">Please select a person from the dropdown.</p>
+        </div>
+
+    </div>
+
+    <script>
+
+
+        let selectedName = "";  // Stores which name was selected
+
+        function showDetails() {
+            // Save selected name only
+            selectedName = document.getElementById("nameSelect").value;
+
+            let photo = document.getElementById("photo");
+            let info = document.getElementById("infoText");
+
+            // Hide image until OK button is clicked
+            photo.style.display = "none";
+
+            if (selectedName === "") {
+                info.innerHTML = "Please select a person from the dropdown.";
+            } else {
+                info.innerHTML = "Click OK to display.";
+            }
+        }
+
+        function openPhoto() {
+
+            if (selectedName === "") {
+                alert("Are you confirm?");
+                return;
+            }
+
+            // -----------------------------
+            // ⭐ CONFIRMATION BOX
+            // -----------------------------
+            let answer = confirm("Do you want to open this image?");
+
+            if (!answer) {
+                // If NO → reset message and hide image
+                document.getElementById("photo").style.display = "none";
+                document.getElementById("infoText").innerHTML = "Please select a person from the dropdown.";
+                return;
+            }
+            // If YES → show the image and info
+
+
+            let photo = document.getElementById("photo");
+            let info = document.getElementById("infoText");
+
+            // Remove old special frames
+            photo.classList.remove("photo-james");
+            photo.classList.remove("photo-james-blue");
+
+            // Mapping names → photo paths
+            let photos = {
+                "guido": "images/guido.jpg",
+                "dennis": "images/dennis.jpg",
+                "james": "images/james.jpg",
+                "stroustrup": "images/stroustrup.jpg",
+                "juergen": "images/juergen.jpg",
+                "krishna": "images/krishna.jpg",
+                "bill_gates": "images/bill_gates.jpg",
+                "steve_jobs": "images/steve_jobs.jpg",
+                "elon_musk": "images/elon_musk.jpg",
+                "zukerberg": "images/zukerberg.jpg",
+                "linus_torvalds": "images/linus_torvalds.jpeg",
+                "tim_berner": "images/tim_berner.jpg",
+                "Sundar_Pichai": "images/Sundar_Pichai.jpg",
+                "satyanadella": "images/satyanadella.jpg",
+                "AdaLovelace": "images/AdaLovelace.jpg",
+                "madhu": "images/madhu.jpg",
+                "tejaswini": "images/tej.jpg"
+            };
+
+            // Mapping names → details
+            let details = {
+                "guido": "Guido van Rossum created Python in 1991.",
+                "dennis": "Dennis Ritchie developed C and co-created UNIX.",
+                "james": "James Gosling invented Java in 1995.",
+                "stroustrup": "Bjarne Stroustrup created C++.",
+                "juergen": "Juergen Hoeller is the co-creator of Spring Framework.",
+                "krishna": "E Krishna Rao Patro — JFS Trainer.",
+                "madhu": "B. Madhusudhan Rao — JFS Trainer.",
+                "tejaswini": "G.Sai Tejaswini — Student.",
+                "bill_gates": "Bill Gates co-founded Microsoft.",
+                "steve_jobs": "Steve Jobs co-founded Apple.",
+                "elon_musk": "Elon Musk leads Tesla & SpaceX.",
+                "zukerberg": "Mark Zuckerberg founded Facebook.",
+                "linus_torvalds": "Linus Torvalds created Linux.",
+                "tim_berner": "Tim Berners-Lee invented the World Wide Web.",
+                "Sundar_Pichai": "Sundar Pichai is the CEO of Google.",
+                "satyanadella": "Satya Nadella is the CEO of Microsoft.",
+                "AdaLovelace": "Ada Lovelace was the first computer programmer."
+            };
+
+            // Set image + info
+            photo.src = photos[selectedName];
+            photo.style.display = "block";
+            info.innerHTML = details[selectedName];
+
+            // Special frame for James
+            if (selectedName === "james") {
+                photo.classList.add("photo-james");
+                photo.classList.add("photo-james-blue");
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
